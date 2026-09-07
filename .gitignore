@@ -1,0 +1,19 @@
+# Environnement virtuel
+venv/
+.venv/
+
+# Fichiers Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Logs et données temporaires
+data/logs/*
+!data/logs/.gitkeep
+
+# VS Code
+.vscode/
