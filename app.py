@@ -48,7 +48,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- Historique des automatisations (session) ---
+# --- Historique des automatisations ---
 if "automation_logs" not in st.session_state:
     st.session_state.automation_logs = []
 
@@ -66,7 +66,7 @@ with st.sidebar:
 
     st.write("---")
     st.success("Mode : Simulation")
-    st.caption("Phase 3 en cours")
+    st.caption("Phase 4 en cours")
 
 # Chargement des données
 driver = SimulationDriver()
@@ -232,11 +232,64 @@ elif page == "⚙️ Automatisation":
 
 elif page == "🔒 Sécurité":
     st.title("🔒 Sécurité & Conformité")
-    st.info("Section en construction (Phase 4)")
-    st.write("Ici on ajoutera :")
-    st.markdown("""
-    - Authentification et rôles
-    - Détection d'appareils non autorisés
-    - Contrôles de conformité
-    - Score de sécurité
-    """)
+
+    # --- Score de sécurité ---
+    st.subheader("🛡️ Score de sécurité du réseau")
+
+    # Calcul simple du score (simulation)
+    total_devices = len(devices)
+    up_devices = sum(1 for d in devices if d.status == "up")
+    high_cpu = sum(1 for d in devices if d.cpu > 70)
+    high_mem = sum(1 for d in devices if d.memory > 80)
+
+    score = 100
+    score -= high_cpu * 8
+    score -= high_mem * 6
+    score -= (total_devices - up_devices) * 15
+    score = max(0, min(100, score))
+
+    # Affichage du score
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Score de sécurité", f"{score}/100")
+    col2.metric("Équipements à risque (CPU élevé)", high_cpu)
+    col3.metric("Équipements à risque (Mémoire élevée)", high_mem)
+
+    if score >= 80:
+        st.success("Le réseau est en bon état de sécurité.")
+    elif score >= 60:
+        st.warning("Le réseau présente quelques points d'attention.")
+    else:
+        st.error("Le réseau présente des risques importants.")
+
+    st.write("---")
+
+    # --- Détection d'appareils non autorisés ---
+    st.subheader("🕵️ Détection d'appareils non autorisés")
+
+    # Simulation d'appareils suspects
+    unauthorized = [
+        {"Nom": "Unknown-Device-01", "IP": "192.168.1.211", "Type": "Inconnu", "Risque": "Élevé"},
+        {"Nom": "PC-Invité", "IP": "192.168.1.187", "Type": "End Device", "Risque": "Moyen"},
+    ]
+
+    unauth_df = pd.DataFrame(unauthorized)
+    st.dataframe(unauth_df, use_container_width=True)
+
+    if st.button("Lancer un scan de détection"):
+        st.success("Scan terminé (simulation) — 2 appareils non autorisés détectés.")
+
+    st.write("---")
+
+    # --- Contrôles de conformité ---
+    st.subheader("✅ Contrôles de conformité")
+
+    compliance = [
+        {"Contrôle": "Présence d'ACL sur les routeurs", "Statut": "OK", "Détail": "ACL détectées"},
+        {"Contrôle": "Mots de passe par défaut", "Statut": "Échec", "Détail": "Aucun mot de passe par défaut trouvé (simulation)"},
+        {"Contrôle": "Accès SSH uniquement", "Statut": "OK", "Détail": "Telnet désactivé"},
+        {"Contrôle": "Logging activé", "Statut": "OK", "Détail": "Logs centralisés"},
+        {"Contrôle": "Mises à jour de firmware", "Statut": "Attention", "Détail": "2 équipements à jour partiel"},
+    ]
+
+    comp_df = pd.DataFrame(compliance)
+    st.dataframe(comp_df, use_container_width=True)
