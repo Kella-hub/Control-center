@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Environnement virtuel
 venv/
 .venv/
@@ -17,24 +16,4 @@ data/logs/*
 !data/logs/.gitkeep
 
 # VS Code
-=======
-# Environnement virtuel
-venv/
-.venv/
-
-# Fichiers Python
-__pycache__/
-*.py[cod]
-*.pyo
-
-# Fichiers système
-.DS_Store
-Thumbs.db
-
-# Logs et données temporaires
-data/logs/*
-!data/logs/.gitkeep
-
-# VS Code
->>>>>>> ad5fb38312626bdcb4136ce44d2418dbf0b70d75
 .vscode/

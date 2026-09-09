@@ -1,14 +1,6 @@
-<<<<<<< HEAD
 streamlit
 plotly
 pyvis
 networkx
 pyyaml
-=======
-streamlit
-plotly
-pyvis
-networkx
-pyyaml
->>>>>>> ad5fb38312626bdcb4136ce44d2418dbf0b70d75
 pandas
