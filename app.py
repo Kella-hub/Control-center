@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Style global (vert) ---
+# --- Style global ---
 st.markdown("""
 <style>
     .stApp {
@@ -66,7 +66,7 @@ with st.sidebar:
 
     st.write("---")
     st.success("Mode : Simulation")
-    st.caption("Phase 4 en cours")
+    st.caption("Phase 5 en cours")
 
 # Chargement des données
 driver = SimulationDriver()
@@ -188,11 +188,14 @@ elif page == "⚙️ Automatisation":
 
     st.subheader("Actions disponibles")
 
-    col1, col2 = st.columns(2)
+    tab1, tab2, tab3 = st.tabs(["💾 Backup", "📡 VLAN", "↩️ Rollback"])
 
-    with col1:
-        st.markdown("### 💾 Backup de configuration")
-        target_backup = st.selectbox("Équipement à sauvegarder", [d.name for d in devices], key="backup_select")
+    # --- TAB 1 : Backup ---
+    with tab1:
+        st.markdown("### Backup de configuration")
+
+        # Backup simple
+        target_backup = st.selectbox("Équipement unique", [d.name for d in devices], key="backup_select")
         if st.button("Lancer le backup", key="btn_backup"):
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             log = {
@@ -203,11 +206,41 @@ elif page == "⚙️ Automatisation":
                 "Détail": f"Backup simulé de {target_backup}"
             }
             st.session_state.automation_logs.insert(0, log)
-            st.success(f"Backup de **{target_backup}** effectué avec succès (simulation)")
+            st.success(f"Backup de **{target_backup}** effectué avec succès")
 
-    with col2:
-        st.markdown("### 📡 Déploiement de VLAN")
-        target_vlan = st.selectbox("Équipement cible", [d.name for d in devices if d.device_type in ["switch", "router"]], key="vlan_select")
+        st.write("---")
+
+        # Backup groupé
+        st.markdown("### Backup groupé (plusieurs équipements)")
+        selected_devices = st.multiselect(
+            "Sélectionner les équipements",
+            [d.name for d in devices],
+            key="multi_backup"
+        )
+        if st.button("Lancer le backup groupé", key="btn_multi_backup"):
+            if not selected_devices:
+                st.warning("Sélectionne au moins un équipement.")
+            else:
+                now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                for dev in selected_devices:
+                    log = {
+                        "Date": now,
+                        "Action": "Backup groupé",
+                        "Équipement": dev,
+                        "Statut": "Succès",
+                        "Détail": f"Backup groupé de {dev}"
+                    }
+                    st.session_state.automation_logs.insert(0, log)
+                st.success(f"Backup groupé terminé sur **{len(selected_devices)}** équipement(s)")
+
+    # --- TAB 2 : VLAN ---
+    with tab2:
+        st.markdown("### Déploiement de VLAN")
+        target_vlan = st.selectbox(
+            "Équipement cible",
+            [d.name for d in devices if d.device_type in ["switch", "router"]],
+            key="vlan_select"
+        )
         vlan_id = st.number_input("ID du VLAN", min_value=1, max_value=4094, value=10)
         if st.button("Déployer le VLAN", key="btn_vlan"):
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -219,7 +252,29 @@ elif page == "⚙️ Automatisation":
                 "Détail": f"VLAN {vlan_id} déployé sur {target_vlan}"
             }
             st.session_state.automation_logs.insert(0, log)
-            st.success(f"VLAN **{vlan_id}** déployé sur **{target_vlan}** (simulation)")
+            st.success(f"VLAN **{vlan_id}** déployé sur **{target_vlan}**")
+
+    # --- TAB 3 : Rollback ---
+    with tab3:
+        st.markdown("### Rollback d'une action")
+        if st.session_state.automation_logs:
+            # On propose de rollback la dernière action
+            last_action = st.session_state.automation_logs[0]
+            st.info(f"Dernière action : **{last_action['Action']}** sur **{last_action['Équipement']}**")
+
+            if st.button("Effectuer le Rollback", key="btn_rollback"):
+                now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                log = {
+                    "Date": now,
+                    "Action": "Rollback",
+                    "Équipement": last_action["Équipement"],
+                    "Statut": "Succès",
+                    "Détail": f"Rollback de l'action : {last_action['Action']}"
+                }
+                st.session_state.automation_logs.insert(0, log)
+                st.success(f"Rollback effectué sur **{last_action['Équipement']}**")
+        else:
+            st.warning("Aucune action à annuler pour le moment.")
 
     st.write("---")
     st.subheader("📜 Journal des automatisations")
@@ -233,10 +288,8 @@ elif page == "⚙️ Automatisation":
 elif page == "🔒 Sécurité":
     st.title("🔒 Sécurité & Conformité")
 
-    # --- Score de sécurité ---
     st.subheader("🛡️ Score de sécurité du réseau")
 
-    # Calcul simple du score (simulation)
     total_devices = len(devices)
     up_devices = sum(1 for d in devices if d.status == "up")
     high_cpu = sum(1 for d in devices if d.cpu > 70)
@@ -248,7 +301,6 @@ elif page == "🔒 Sécurité":
     score -= (total_devices - up_devices) * 15
     score = max(0, min(100, score))
 
-    # Affichage du score
     col1, col2, col3 = st.columns(3)
     col1.metric("Score de sécurité", f"{score}/100")
     col2.metric("Équipements à risque (CPU élevé)", high_cpu)
@@ -262,25 +314,18 @@ elif page == "🔒 Sécurité":
         st.error("Le réseau présente des risques importants.")
 
     st.write("---")
-
-    # --- Détection d'appareils non autorisés ---
     st.subheader("🕵️ Détection d'appareils non autorisés")
 
-    # Simulation d'appareils suspects
     unauthorized = [
         {"Nom": "Unknown-Device-01", "IP": "192.168.1.211", "Type": "Inconnu", "Risque": "Élevé"},
         {"Nom": "PC-Invité", "IP": "192.168.1.187", "Type": "End Device", "Risque": "Moyen"},
     ]
-
-    unauth_df = pd.DataFrame(unauthorized)
-    st.dataframe(unauth_df, use_container_width=True)
+    st.dataframe(pd.DataFrame(unauthorized), use_container_width=True)
 
     if st.button("Lancer un scan de détection"):
         st.success("Scan terminé (simulation) — 2 appareils non autorisés détectés.")
 
     st.write("---")
-
-    # --- Contrôles de conformité ---
     st.subheader("✅ Contrôles de conformité")
 
     compliance = [
@@ -290,6 +335,4 @@ elif page == "🔒 Sécurité":
         {"Contrôle": "Logging activé", "Statut": "OK", "Détail": "Logs centralisés"},
         {"Contrôle": "Mises à jour de firmware", "Statut": "Attention", "Détail": "2 équipements à jour partiel"},
     ]
-
-    comp_df = pd.DataFrame(compliance)
-    st.dataframe(comp_df, use_container_width=True)
+    st.dataframe(pd.DataFrame(compliance), use_container_width=True)

@@ -1,46 +1,23 @@
-# 🌐 NetDevOps Dashboard
 
-**Automation • Observability • Security**
-
-Dashboard NetDevOps développé en mode simulation.  
-Architecture conçue dès le départ pour pouvoir se brancher plus tard sur de vrais équipements (netmiko / NAPALM).
-
----
-
-## 🎯 Objectif du projet
-
-Ce projet démontre les compétences clés d’un profil **NetDevOps Junior** :
-
-- Python propre et modulaire (orienté objet)
-- Automatisation réseau
-- Infrastructure as Code (YAML)
-- Observabilité (métriques + topologie)
-- Sécurité et conformité
-- Architecture évolutive (Drivers)
-
----
-
-## 🏗️ Architecture
-
-**Principe clé :**  
-La couche `Drivers` permet de passer de la simulation à de vrais équipements sans réécrire toute l’application.
+**Point fort :**  
+Grâce à la couche `Drivers`, on pourra brancher de vrais équipements plus tard **sans réécrire** le reste de l’application.
 
 ---
 
 ## ✨ Fonctionnalités
 
-### Observabilité
+### 📊 Observabilité
 - Tableau d’état des équipements en temps réel
 - Graphiques CPU / Mémoire
 - Historique des métriques
 - Topologie réseau interactive (Pyvis)
 
-### Automatisation
-- Backup de configuration (simulation)
+### ⚙️ Automatisation
+- Backup de configuration
 - Déploiement de VLAN
 - Journal des actions
 
-### Sécurité
+### 🔒 Sécurité
 - Score de sécurité du réseau
 - Détection d’appareils non autorisés
 - Contrôles de conformité
@@ -52,8 +29,11 @@ La couche `Drivers` permet de passer de la simulation à de vrais équipements s
 ```bash
 git clone https://github.com/Kella-hub/Control-center.git
 cd Control-center
+
 python -m venv venv
 venv\Scripts\activate          # Windows
+# source venv/bin/activate     # Linux / Mac
+
 pip install -r requirements.txt
 streamlit run app.py
 
